@@ -13,31 +13,45 @@ The objective is to gain hands-on experience with AWS networking fundamentals, i
 
 
 ```text
-                         INTERNET
+                          INTERNET
                              |
                              |
-                    Internet Gateway
+                    INTERNET GATEWAY
                              |
                              |
-                    VPC: 10.0.0.0/16
+                  +----------------------+
+                  |    VPC: 10.0.0.0/16  |
+                  +----------------------+
                              |
               +--------------+--------------+
               |                             |
               |                             |
-        PUBLIC SUBNET                 PRIVATE SUBNET
-        10.0.1.0/24                   10.0.2.0/24
+       PUBLIC SUBNET                 PRIVATE SUBNET
+       10.0.1.0/24                   10.0.2.0/24
               |                             |
-        Public Route Table            Private Route Table
+      PUBLIC ROUTE TABLE           PRIVATE ROUTE TABLE
               |                             |
-        0.0.0.0/0 -> IGW                Local Route
+       0.0.0.0/0 -> IGW                Local Route
+              |                             |
+              |                             |
+       +--------------+              +--------------+
+       |  PUBLIC EC2  |              |  PRIVATE EC2 |
+       |              |              |              |
+       | Bastion Host |--------------| Private      |
+       |              |   SSH : 22   | Instance     |
+       +--------------+              +--------------+
+              |                             |
+       SECURITY GROUP                 SECURITY GROUP
+          SG-lab                    SG-lab-private
+       SSH: Port 22                 SSH: Port 22
+       Source: My IP                Source: SG-lab
               |
               |
-         EC2 INSTANCE
+      EC2 INSTANCE CONNECT
+       (Browser-based SSH)
               |
-        Security Group
-           SSH: 22
               |
-      EC2 Instance Connect
+        YOUR WINDOWS PC
 ```
 
 ## ☁️ AWS Services Used
