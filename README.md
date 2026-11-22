@@ -8,7 +8,8 @@ The objective is to gain hands-on experience with AWS networking fundamentals, i
 
 ## 🏗️ Architecture
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/986fade0-ae76-4537-9f52-408588fa4adb" />
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/89b3eee2-7d6c-4124-af76-75e220da064d" />
+
 
 
 ```text
