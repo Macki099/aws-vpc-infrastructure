@@ -44,9 +44,7 @@ The infrastructure is designed around the following components:
 
 ## Architecture Diagram
 
-![AWS VPC Architecture](architecture/vpc-architecture.png)
 
-> Replace this image with the actual architecture diagram once created.
 
 ## Repository Structure
 
