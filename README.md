@@ -1,125 +1,201 @@
-# aws-vpc-infrastructure
-Demonstrate your understanding of AWS networking, subnet design, network security, and infrastructure provisioning.
+# AWS VPC Networking Lab: Public and Private Subnets with EC2
 
+## 📌 Project Overview
 
+This project demonstrates the implementation of a custom Amazon Virtual Private Cloud (VPC) environment using AWS. It includes the creation of public and private subnets, route tables, an Internet Gateway, Network ACLs, Security Groups, and an EC2 instance.
 
-# AWS Secure VPC Infrastructure
+The objective is to gain hands-on experience with AWS networking fundamentals, infrastructure configuration, and secure access to cloud resources.
 
-A hands-on cloud engineering project focused on designing a secure and highly available network infrastructure using Amazon Virtual Private Cloud (VPC) and AWS CloudFormation.
+## 🏗️ Architecture
 
-## Project Overview
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/986fade0-ae76-4537-9f52-408588fa4adb" />
 
-This project demonstrates how to design and provision a structured AWS network environment using Infrastructure as Code (IaC).
-
-The proposed architecture separates internet-facing resources from private workloads using public and private subnets distributed across multiple Availability Zones.
-
-The infrastructure is designed to demonstrate network segmentation, controlled traffic flow, and secure resource communication.
-
-## Objectives
-
-- Design a custom AWS VPC.
-- Configure public and private subnets across multiple Availability Zones.
-- Implement Internet Gateway and NAT Gateway connectivity.
-- Configure route tables and subnet associations.
-- Apply security groups and network access controls.
-- Automate infrastructure provisioning using AWS CloudFormation.
-- Document network architecture and security decisions.
-
-## Proposed Architecture
-
-The infrastructure is designed around the following components:
-
-| Component | Purpose |
-|---|---|
-| Amazon VPC | Isolated virtual network |
-| Public Subnets | Host internet-facing resources |
-| Private Subnets | Isolate internal workloads |
-| Internet Gateway | Provide internet connectivity to public resources |
-| NAT Gateway | Allow private resources to initiate outbound internet connections |
-| Route Tables | Control network traffic routing |
-| Security Groups | Control instance-level traffic |
-| Network ACLs | Apply subnet-level traffic rules |
-| Amazon EC2 | Simulate application workloads |
-| CloudFormation | Automate infrastructure provisioning |
-
-## Architecture Diagram
-
-<img width="1880" height="1480" alt="image" src="https://github.com/user-attachments/assets/52ce5d7b-11ce-479b-b58a-7467c0a48d8b" />
-
-
-
-## Repository Structure
 
 ```text
-aws-vpc-infrastructure/
-├── architecture/
-│   └── vpc-architecture.png
-├── templates/
-│   └── vpc-infrastructure.yaml
-├── documentation/
-│   ├── network-design.md
-│   ├── security-design.md
-│   └── deployment-guide.md
-├── scripts/
-│   └── validate-template.sh
-├── screenshots/
-└── README.md
+                         INTERNET
+                             |
+                             |
+                    Internet Gateway
+                             |
+                             |
+                    VPC: 10.0.0.0/16
+                             |
+              +--------------+--------------+
+              |                             |
+              |                             |
+        PUBLIC SUBNET                 PRIVATE SUBNET
+        10.0.1.0/24                   10.0.2.0/24
+              |                             |
+        Public Route Table            Private Route Table
+              |                             |
+        0.0.0.0/0 -> IGW                Local Route
+              |
+              |
+         EC2 INSTANCE
+              |
+        Security Group
+           SSH: 22
+              |
+      EC2 Instance Connect
 ```
 
-## Technologies and Tools
+## ☁️ AWS Services Used
 
-- Amazon VPC
-- Amazon EC2
-- AWS IAM
-- AWS CloudFormation
-- Linux
-- YAML
-- Git and GitHub
-- cfn-lint
+| AWS Service | Purpose |
+|---|---|
+| Amazon VPC | Creates an isolated virtual network |
+| Subnets | Separates public and private resources |
+| Route Tables | Controls network traffic routing |
+| Internet Gateway | Provides internet connectivity |
+| Network ACL | Controls inbound and outbound subnet traffic |
+| Security Groups | Controls instance-level network traffic |
+| Amazon EC2 | Hosts the virtual machine |
+| EC2 Instance Connect | Provides browser-based SSH access |
 
-## Implementation Plan
+## ⚙️ Implementation Steps
 
-1. Design the network topology.
-2. Define VPC and subnet configurations.
-3. Configure gateways, route tables, and security controls.
-4. Develop CloudFormation templates.
-5. Validate infrastructure templates.
-6. Document architecture and implementation decisions.
-7. Deploy and test the infrastructure when AWS account access is available.
+### 1. Create a VPC
 
-## Testing and Validation
+Created a custom VPC with the following configuration:
 
-The project will use local template validation and static analysis to identify configuration and syntax issues.
+| Configuration | Value |
+|---|---|
+| VPC Name | VPC-lab |
+| IPv4 CIDR | `10.0.0.0/16` |
 
-Planned validation includes:
+### 2. Create Two Subnets
 
-- CloudFormation template linting.
-- Resource configuration review.
-- Network architecture review.
-- Security configuration review.
+Created two subnets within the custom VPC.
 
-Actual AWS deployment and connectivity testing will be documented separately once AWS account access is available.
+**Public Subnet**
 
-## Project Status
+| Configuration | Value |
+|---|---|
+| Subnet Name | Public-subnet |
+| IPv4 CIDR | `10.0.1.0/24` |
 
-**Status:** In Progress  
-**AWS Deployment:** Pending AWS account access
+**Private Subnet**
 
-This project is currently being developed using local tools and Infrastructure as Code templates.
+| Configuration | Value |
+|---|---|
+| Subnet Name | Private-subnet |
+| IPv4 CIDR | `10.0.2.0/24` |
 
-## Learning Outcomes
+The public subnet is intended for resources requiring direct internet connectivity, while the private subnet is intended for resources that should not be directly accessible from the internet.
 
-- AWS networking fundamentals.
-- VPC and subnet architecture.
-- Network segmentation and traffic control.
-- Infrastructure as Code.
-- Cloud security fundamentals.
+### 3. Create Two Route Tables
 
-## Author
+Created separate route tables for the public and private subnets.
 
-**Miguel Mayor**
+**Public Route Table**
+- Created a public route table.
+- Added a default route pointing to the Internet Gateway.
+- Configured the destination as `0.0.0.0/0`.
+- Associated the route table with the public subnet.
 
-Computer Engineering Graduate | AWS re/Start Graduate | Aspiring Cloud Engineer
+| Destination | Target |
+|---|---|
+| `10.0.0.0/16` | Local |
+| `0.0.0.0/0` | Internet Gateway |
 
-- GitHub: https://github.com/Macki099
-- LinkedIn: https://www.linkedin.com/in/miguel-salvador-mayor-a1172a2ba/
+**Private Route Table**
+- Created a separate private route table.
+- Intended to be associated with the private subnet.
+- Retained the default local VPC route.
+- No Internet Gateway route was configured.
+
+### 4. Create and Attach an Internet Gateway
+
+- Created an Internet Gateway.
+- Attached the Internet Gateway to `VPC-lab`.
+- Added the Internet Gateway as the target of the public route table's default route.
+
+### 5. Configure Network ACL (NACL)
+
+Created a Network ACL to control inbound and outbound traffic at the subnet level.
+
+For this initial lab configuration:
+- Allowed all inbound traffic.
+- Allowed all outbound traffic.
+
+This configuration was used to simplify connectivity testing.
+
+### 6. Create a Security Group
+
+Created a Security Group named `SG-lab`.
+
+Configured the following inbound rule:
+
+| Type | Protocol | Port Range | Purpose |
+|---|---|---|---|
+| SSH | TCP | 22 | Remote instance access |
+
+Attached `SG-lab` to the EC2 instance.
+
+**Security Note:** For production environments, SSH access should be restricted to trusted IP addresses.
+
+### 7. Launch an EC2 Instance
+
+Created an EC2 instance with the following networking configuration:
+
+- Selected the custom VPC (`VPC-lab`).
+- Selected the appropriate subnet.
+- Attached the `SG-lab` Security Group.
+- Configured the instance for SSH connectivity.
+
+### 8. Connect to EC2 Using EC2 Instance Connect
+
+Used EC2 Instance Connect through the AWS Management Console to establish an SSH connection to the EC2 instance.
+
+**Result:** Successfully accessed the EC2 instance through the browser-based terminal.
+
+## 📸 Screenshots and Documentation
+
+Screenshots documenting the implementation will be uploaded to the repository.
+
+```text
+screenshots/
+├── vpc-configuration.png
+├── subnet-configuration.png
+├── route-tables.png
+├── internet-gateway.png
+├── nacl-configuration.png
+├── security-group.png
+└── ec2-instance-connect.png
+```
+
+## 🧠 Skills Demonstrated
+
+- AWS VPC Configuration
+- IPv4 CIDR Block Planning
+- Public and Private Subnet Design
+- Route Table Configuration
+- Internet Gateway Configuration
+- Network ACL Configuration
+- Security Group Management
+- EC2 Instance Deployment
+- SSH Fundamentals
+- EC2 Instance Connect
+
+## 🚀 Future Improvements
+
+- [ ] Verify public and private subnet route table associations.
+- [ ] Test outbound internet connectivity from the public EC2 instance.
+- [ ] Deploy another EC2 instance in the private subnet.
+- [ ] Configure a Bastion Host for private EC2 access.
+- [ ] Configure a NAT Gateway for private subnet outbound internet access.
+- [ ] Implement more restrictive Network ACL and Security Group rules.
+- [ ] Document connectivity and security testing.
+- [ ] Create a detailed AWS architecture diagram.
+
+## 📚 Key Learnings
+
+Through this project, I gained practical experience in building a custom AWS networking environment and understanding how VPCs, subnets, route tables, Internet Gateways, NACLs, and Security Groups work together.
+
+I also gained hands-on experience deploying an EC2 instance and accessing it through EC2 Instance Connect.
+
+---
+
+**Project Category:** AWS Networking / Cloud Infrastructure  
+**Cloud Provider:** Amazon Web Services (AWS)  
+**Status:** Initial Implementation Completed
