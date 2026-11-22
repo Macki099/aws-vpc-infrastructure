@@ -44,6 +44,8 @@ The infrastructure is designed around the following components:
 
 ## Architecture Diagram
 
+<img width="1880" height="1480" alt="image" src="https://github.com/user-attachments/assets/52ce5d7b-11ce-479b-b58a-7467c0a48d8b" />
+
 
 
 ## Repository Structure
